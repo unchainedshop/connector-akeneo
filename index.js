@@ -3,6 +3,8 @@ import { start, stop } from "./lib/remotes/mongodb-dev.js";
 import mongodb from "mongodb";
 import AkeneoAPI from "./lib/remotes/akeneo.js";
 import UnchainedAPI from "./lib/remotes/unchained.js";
+import * as Journal from "./lib/journal.js";
+import { extract, transform, load } from "./lib/etl.js";
 
 const { MongoClient } = mongodb;
 const { NODE_ENV, MONGO_URL } = process.env;
@@ -26,8 +28,54 @@ export default async function run() {
 
   try {
     await mongo.connect();
-    await akeneo.getProducts();
-    await unchained.submitEvents([]);
+    const journalEntry = await Journal.start({ mongo });
+
+    const context = {
+      mongo,
+      akeneo,
+      unchained,
+      journalEntry,
+    };
+
+    try {
+      await extract(context);
+    } finally {
+      await Journal.reportFinalStatus(
+        {
+          status: Journal.CompletionStatus.FAILED_EXTRACT,
+        },
+        context
+      );
+    }
+
+    try {
+      await transform(context);
+    } finally {
+      await Journal.reportFinalStatus(
+        {
+          status: Journal.CompletionStatus.FAILED_TRANSFORM,
+        },
+        context
+      );
+    }
+
+    try {
+      await load(context);
+    } finally {
+      await Journal.reportFinalStatus(
+        {
+          status: Journal.CompletionStatus.FAILED_LOAD,
+        },
+        context
+      );
+    }
+
+    await Journal.reportFinalStatus(
+      {
+        status: Journal.CompletionStatus.COMPLETE,
+      },
+      context
+    );
   } finally {
     await mongo.close();
   }
@@ -35,4 +83,4 @@ export default async function run() {
   process.exit();
 }
 
-run().catch(console.dir);
+run().catch(console.error);
