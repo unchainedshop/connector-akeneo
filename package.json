@@ -1,0 +1,33 @@
+{
+  "name": "connector-akeneo",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "lint": "npx eslint --fix .",
+    "start": "node --harmony-top-level-await index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unchainedshop/connector-akeneo.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/unchainedshop/connector-akeneo/issues"
+  },
+  "homepage": "https://github.com/unchainedshop/connector-akeneo#readme",
+  "devDependencies": {
+    "eslint": "^7.10.0",
+    "eslint-config-prettier": "^6.12.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "mongodb-memory-server": "^6.9.1",
+    "prettier": "2.1.2"
+  },
+  "dependencies": {
+    "dotenv-extended": "^2.9.0",
+    "mongodb": "^3.6.2",
+    "node-fetch": "^2.6.1"
+  }
+}
