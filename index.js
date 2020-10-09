@@ -2,6 +2,7 @@ import "./lib/node_env.js";
 import { start, stop } from "./lib/remotes/mongodb-dev.js";
 import mongodb from "mongodb";
 import AkeneoAPI from "./lib/remotes/akeneo.js";
+import UnchainedAPI from "./lib/remotes/unchained.js";
 
 const { MongoClient } = mongodb;
 const { NODE_ENV, MONGO_URL } = process.env;
@@ -19,13 +20,16 @@ const getMongoDBUri = async () => {
 
 export default async function run() {
   const uri = await getMongoDBUri();
-  const client = new MongoClient(uri, { useUnifiedTopology: true });
-  const akeneo = AkeneoAPI({ client });
+  const mongo = new MongoClient(uri, { useUnifiedTopology: true });
+  const akeneo = AkeneoAPI();
+  const unchained = UnchainedAPI();
+
   try {
-    await client.connect();
+    await mongo.connect();
     await akeneo.getProducts();
+    await unchained.submitEvents([]);
   } finally {
-    await client.close();
+    await mongo.close();
   }
   await stop();
   process.exit();
