@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "lint": "npx eslint --fix .",
-    "start": "node --harmony-top-level-await index.js"
+    "start": "node --harmony-top-level-await index.js",
+    "dev": "RESET_JOURNAL=1 MONGO_URL=mongodb://localhost:4011/akeneo-connector node --harmony-top-level-await index.js"
   },
   "repository": {
     "type": "git",

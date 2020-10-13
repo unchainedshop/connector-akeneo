@@ -7,7 +7,7 @@ import * as Journal from "./lib/journal.js";
 import { extract, transform, load } from "./lib/etl.js";
 
 const { MongoClient } = mongodb;
-const { NODE_ENV, MONGO_URL } = process.env;
+const { NODE_ENV, MONGO_URL, RESET_JOURNAL } = process.env;
 
 const getMongoDBUri = async () => {
   if (MONGO_URL) return MONGO_URL;
@@ -28,7 +28,7 @@ export default async function run() {
 
   try {
     await mongo.connect();
-    const journalEntry = await Journal.start({ mongo });
+    const journalEntry = await Journal.start({ reset: !!RESET_JOURNAL, mongo });
 
     const context = {
       mongo,
@@ -39,35 +39,38 @@ export default async function run() {
 
     try {
       await extract(context);
-    } finally {
+    } catch (e) {
       await Journal.reportFinalStatus(
         {
           status: Journal.CompletionStatus.FAILED_EXTRACT,
         },
         context
       );
+      throw e;
     }
 
     try {
       await transform(context);
-    } finally {
+    } catch (e) {
       await Journal.reportFinalStatus(
         {
           status: Journal.CompletionStatus.FAILED_TRANSFORM,
         },
         context
       );
+      throw e;
     }
 
     try {
       await load(context);
-    } finally {
+    } catch (e) {
       await Journal.reportFinalStatus(
         {
           status: Journal.CompletionStatus.FAILED_LOAD,
         },
         context
       );
+      throw e;
     }
 
     await Journal.reportFinalStatus(
@@ -79,7 +82,9 @@ export default async function run() {
   } finally {
     await mongo.close();
   }
-  await stop();
+  try {
+    await stop();
+  } catch (e) {}
   process.exit();
 }
 
