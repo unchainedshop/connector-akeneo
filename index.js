@@ -20,7 +20,7 @@ const getMongoDBUri = async () => {
   );
 };
 
-export default async function run() {
+async function run() {
   const uri = await getMongoDBUri();
   const mongo = new MongoClient(uri, { useUnifiedTopology: true });
   const akeneo = AkeneoAPI();
