@@ -9,4 +9,4 @@ RUN npm install --production
 ADD . /webapp
 
 WORKDIR /webapp
-CMD npm start
+CMD node local.js

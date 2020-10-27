@@ -32,6 +32,7 @@ Execute:
 ### Deploy to AWS Lambda
 > $ npx serverless deploy
 
+
 # Usage with Swarm Cronjob
 
 https://crazymax.dev/swarm-cronjob/
